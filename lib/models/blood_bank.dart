@@ -6,7 +6,7 @@ class BloodBank {
   final double latitude;
   final double longitude;
   final String operatingHours;
-  final double? distance; // jarak dari lokasi user (km)
+  final double? distance;
   final DateTime? createdAt;
 
   BloodBank({
@@ -27,14 +27,24 @@ class BloodBank {
       name: json['name'] ?? '',
       address: json['address'] ?? '',
       phone: json['phone'] ?? '',
-      latitude: (json['latitude'] ?? 0.0).toDouble(),
-      longitude: (json['longitude'] ?? 0.0).toDouble(),
+      // Perbaikan: Handle berbagai tipe data untuk koordinat
+      latitude: _parseDouble(json['latitude']),
+      longitude: _parseDouble(json['longitude']),
       operatingHours: json['operating_hours'] ?? '',
-      distance: json['distance'] != null ? (json['distance'] as num).toDouble() : null,
+      distance: json['distance'] != null ? _parseDouble(json['distance']) : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
     );
+  }
+
+  // Helper method untuk parsing double dari berbagai tipe
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 
   Map<String, dynamic> toJson() {

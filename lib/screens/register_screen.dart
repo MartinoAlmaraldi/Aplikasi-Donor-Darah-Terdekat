@@ -5,11 +5,13 @@ import '../utils/validators.dart';
 import '../utils/constants.dart';
 import '../widgets/custom_button.dart';
 
+// Menampilkan UI dan menangani input untuk pendaftaran pengguna baru.
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // --- CONTROLLER & STATE INITIALIZATION ---
     final authController = Get.find<AuthController>();
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController();
@@ -17,14 +19,18 @@ class RegisterScreen extends StatelessWidget {
     final phoneController = TextEditingController();
     final passwordController = TextEditingController();
     final addressController = TextEditingController();
+
+    // State reaktif untuk dropdown dan visibilitas password.
     final selectedBloodType = 'A+'.obs;
     final obscurePassword = true.obs;
 
+    // --- UI SCAFFOLD ---
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        // Tombol kembali kustom.
         leading: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -38,13 +44,15 @@ class RegisterScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
+        // Memastikan konten bisa di-scroll.
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Form(
-            key: formKey,
+            key: formKey, // Kunci untuk validasi form.
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // --- HEADER ---
                 const Text(
                   'Buat Akun Baru',
                   style: TextStyle(
@@ -62,6 +70,8 @@ class RegisterScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
+
+                // --- FORM FIELD: NAMA LENGKAP ---
                 TextFormField(
                   controller: nameController,
                   style: const TextStyle(fontSize: 15),
@@ -92,6 +102,8 @@ class RegisterScreen extends StatelessWidget {
                   validator: (value) => Validators.validateRequired(value, 'Nama'),
                 ),
                 const SizedBox(height: 16),
+
+                // --- FORM FIELD: EMAIL ---
                 TextFormField(
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -123,6 +135,8 @@ class RegisterScreen extends StatelessWidget {
                   validator: Validators.validateEmail,
                 ),
                 const SizedBox(height: 16),
+
+                // --- FORM FIELD: NOMOR TELEPON ---
                 TextFormField(
                   controller: phoneController,
                   keyboardType: TextInputType.phone,
@@ -154,6 +168,8 @@ class RegisterScreen extends StatelessWidget {
                   validator: Validators.validatePhone,
                 ),
                 const SizedBox(height: 16),
+
+                // --- FORM FIELD: GOLONGAN DARAH (DROPDOWN) ---
                 Obx(() => DropdownButtonFormField<String>(
                   value: selectedBloodType.value,
                   style: const TextStyle(fontSize: 15, color: Color(0xFF212121)),
@@ -177,12 +193,14 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                   ),
+                  // Mengambil data item dari konstanta.
                   items: AppConstants.bloodTypes.map((String type) {
                     return DropdownMenuItem(
                       value: type,
                       child: Text(type),
                     );
                   }).toList(),
+                  // Memperbarui state saat pilihan berubah.
                   onChanged: (String? value) {
                     if (value != null) {
                       selectedBloodType.value = value;
@@ -190,6 +208,8 @@ class RegisterScreen extends StatelessWidget {
                   },
                 )),
                 const SizedBox(height: 16),
+
+                // --- FORM FIELD: ALAMAT ---
                 TextFormField(
                   controller: addressController,
                   maxLines: 3,
@@ -224,14 +244,17 @@ class RegisterScreen extends StatelessWidget {
                   validator: (value) => Validators.validateRequired(value, 'Alamat'),
                 ),
                 const SizedBox(height: 16),
+
+                // --- FORM FIELD: PASSWORD ---
                 Obx(() => TextFormField(
                   controller: passwordController,
-                  obscureText: obscurePassword.value,
+                  obscureText: obscurePassword.value, // Visibilitas dikontrol oleh state.
                   style: const TextStyle(fontSize: 15),
                   decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
                     prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[600], size: 22),
+                    // Ikon untuk mengubah visibilitas password.
                     suffixIcon: IconButton(
                       icon: Icon(
                         obscurePassword.value ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -263,10 +286,14 @@ class RegisterScreen extends StatelessWidget {
                   validator: Validators.validatePassword,
                 )),
                 const SizedBox(height: 32),
+
+                // --- TOMBOL AKSI: DAFTAR ---
                 Obx(() => CustomButton(
                   text: 'Daftar',
                   onPressed: () {
+                    // Validasi form sebelum mengirim data.
                     if (formKey.currentState!.validate()) {
+                      // Memanggil method register dari controller.
                       authController.register({
                         'name': nameController.text.trim(),
                         'email': emailController.text.trim(),
@@ -277,10 +304,13 @@ class RegisterScreen extends StatelessWidget {
                       });
                     }
                   },
+                  // Status loading di-pass ke button.
                   isLoading: authController.isLoading.value,
                   icon: Icons.check_rounded,
                 )),
                 const SizedBox(height: 24),
+
+                // --- NAVIGASI: LINK KE HALAMAN LOGIN ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -292,7 +322,7 @@ class RegisterScreen extends StatelessWidget {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => Get.back(),
+                      onTap: () => Get.back(), // Kembali ke halaman login.
                       child: const Text(
                         'Masuk',
                         style: TextStyle(

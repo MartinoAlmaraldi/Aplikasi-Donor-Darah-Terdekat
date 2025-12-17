@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/profile_controller.dart';
 
+// Menampilkan halaman profil pengguna yang sedang login.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Mengambil instance ProfileController via GetX.
     final controller = Get.find<ProfileController>();
 
     return Scaffold(
@@ -19,6 +21,7 @@ class ProfileScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF212121),
         elevation: 0,
+        // Tombol kembali.
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Get.back(),
@@ -30,6 +33,7 @@ class ProfileScreen extends StatelessWidget {
               color: Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
             ),
+            // Tombol edit profil (fitur sementara).
             child: IconButton(
               icon: const Icon(Icons.edit_rounded),
               onPressed: () => Get.snackbar(
@@ -45,7 +49,10 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
+      // Menggunakan Obx untuk membuat UI reaktif terhadap perubahan state.
       body: Obx(() {
+        // --- LOADING STATE ---
+        // Menampilkan indikator loading saat data sedang diambil.
         if (controller.isLoading.value && controller.user.value == null) {
           return const Center(
             child: CircularProgressIndicator(color: Color(0xFFE53935)),
@@ -53,6 +60,8 @@ class ProfileScreen extends StatelessWidget {
         }
 
         final user = controller.user.value;
+        // --- EMPTY STATE ---
+        // Menampilkan pesan jika data user tidak ditemukan.
         if (user == null) {
           return Center(
             child: Column(
@@ -72,6 +81,8 @@ class ProfileScreen extends StatelessWidget {
           );
         }
 
+        // --- SUCCESS STATE ---
+        // Menampilkan data profil jika berhasil dimuat.
         return SingleChildScrollView(
           child: Column(
             children: [
@@ -95,6 +106,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+                // Menampilkan inisial nama pengguna.
                 child: Center(
                   child: Text(
                     user.name.substring(0, 1).toUpperCase(),
@@ -107,6 +119,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+              // Menampilkan nama lengkap pengguna.
               Text(
                 user.name,
                 style: const TextStyle(
@@ -116,6 +129,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
+              // Menampilkan badge golongan darah.
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
@@ -158,6 +172,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    // Membangun kartu informasi menggunakan helper method.
                     _buildInfoCard(Icons.email_rounded, 'Email', user.email),
                     const SizedBox(height: 12),
                     _buildInfoCard(Icons.phone_rounded, 'Telepon', user.phone),
@@ -174,6 +189,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  // Helper method untuk membuat widget kartu informasi yang reusable.
   Widget _buildInfoCard(IconData icon, String label, String value) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -190,6 +206,7 @@ class ProfileScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // Ikon di sisi kiri.
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -199,6 +216,7 @@ class ProfileScreen extends StatelessWidget {
             child: Icon(icon, color: const Color(0xFFE53935), size: 24),
           ),
           const SizedBox(width: 16),
+          // Kolom untuk label dan value.
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
