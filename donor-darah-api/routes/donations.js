@@ -1,13 +1,50 @@
+/**
+ * ========================================
+ * DONATIONS ROUTES
+ * ========================================
+ *
+ * Endpoint untuk mengelola riwayat dan permintaan donor darah
+ *
+ * ENDPOINTS:
+ * GET /api/donations/user/:userId - Riwayat donor user
+ * POST /api/donations - Buat permintaan donor baru
+ * PUT /api/donations/:id/status - Update status donor
+ * GET /api/donations/:id - Detail donor spesifik
+ * DELETE /api/donations/:id - Hapus riwayat donor
+ *
+ * STATUS DONOR:
+ * - pending: Menunggu konfirmasi
+ * - approved: Disetujui PMI
+ * - rejected: Ditolak
+ * - completed: Selesai donor
+ *
+ * FLOW DONOR:
+ * 1. User buat permintaan (status: pending)
+ * 2. PMI approve/reject
+ * 3. Jika approved, user donor
+ * 4. Update status jadi completed
+ */
+
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
 
-// Get donation history by user
+/**
+ * GET /api/donations/user/:userId
+ * Get riwayat donor untuk user tertentu
+ *
+ * Params:
+ * - userId: ID user
+ *
+ * Return: Array riwayat donor dengan nama blood bank
+ * Sort: Terbaru dulu (DESC)
+ */
 router.get('/user/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
 
+    // Query dengan JOIN untuk mendapatkan nama blood bank
     const [donations] = await db.query(`
       SELECT
         dh.*,
@@ -31,12 +68,26 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
-// Create new donation request
+/**
+ * POST /api/donations
+ * Buat permintaan donor baru
+ *
+ * Body: {
+ *   user_id: number,
+ *   blood_bank_id: number,
+ *   donation_date: date,
+ *   blood_type: string,
+ *   quantity: number (ml),
+ *   notes: string (optional)
+ * }
+ *
+ * Status default: pending
+ */
 router.post('/', async (req, res) => {
   try {
     const { user_id, blood_bank_id, donation_date, blood_type, quantity, notes } = req.body;
 
-    // Validasi input
+    // Validasi: pastikan field required diisi
     if (!user_id || !blood_bank_id || !donation_date || !blood_type || !quantity) {
       return res.status(400).json({
         success: false,
@@ -44,7 +95,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Insert donation
+    // Insert donation dengan status pending
     const [result] = await db.query(`
       INSERT INTO donation_history
       (user_id, blood_bank_id, donation_date, blood_type, quantity, status, notes)
@@ -67,13 +118,26 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update donation status
+/**
+ * PUT /api/donations/:id/status
+ * Update status donation
+ *
+ * Params:
+ * - id: ID donation
+ *
+ * Body: {
+ *   status: string (pending|approved|rejected|completed),
+ *   notes: string (optional)
+ * }
+ *
+ * Digunakan oleh PMI untuk approve/reject/complete donation
+ */
 router.put('/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
     const { status, notes } = req.body;
 
-    // Validasi status
+    // Validasi status harus salah satu dari yang valid
     const validStatuses = ['pending', 'approved', 'rejected', 'completed'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
@@ -82,6 +146,7 @@ router.put('/:id/status', async (req, res) => {
       });
     }
 
+    // Update status dan notes
     await db.query(
       'UPDATE donation_history SET status = ?, notes = ? WHERE id = ?',
       [status, notes, id]
@@ -100,11 +165,20 @@ router.put('/:id/status', async (req, res) => {
   }
 });
 
-// Get donation by ID
+/**
+ * GET /api/donations/:id
+ * Get detail donation spesifik
+ *
+ * Params:
+ * - id: ID donation
+ *
+ * Return: Detail lengkap dengan nama blood bank dan user
+ */
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Query dengan JOIN untuk mendapatkan nama blood bank dan user
     const [donations] = await db.query(`
       SELECT
         dh.*,
@@ -136,11 +210,20 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Delete donation
+/**
+ * DELETE /api/donations/:id
+ * Hapus riwayat donor
+ *
+ * Params:
+ * - id: ID donation
+ *
+ * Biasanya hanya untuk donation dengan status pending
+ */
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Hard delete dari database
     await db.query('DELETE FROM donation_history WHERE id = ?', [id]);
 
     res.json({

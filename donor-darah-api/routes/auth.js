@@ -1,15 +1,58 @@
+/**
+ * ========================================
+ * AUTHENTICATION ROUTES
+ * ========================================
+ *
+ * Endpoint untuk autentikasi user (register & login)
+ *
+ * ENDPOINTS:
+ * POST /api/auth/register - Registrasi user baru
+ * POST /api/auth/login - Login user
+ *
+ * SECURITY:
+ * - Password di-hash menggunakan bcrypt (salt rounds: 10)
+ * - JWT token dengan expiry 7 hari
+ * - Validasi input sebelum proses data
+ *
+ * FLOW REGISTER:
+ * 1. Validasi semua field required
+ * 2. Cek email sudah terdaftar atau belum
+ * 3. Hash password dengan bcrypt
+ * 4. Insert user ke database
+ * 5. Return success dengan data user (tanpa password)
+ *
+ * FLOW LOGIN:
+ * 1. Validasi email & password tidak kosong
+ * 2. Cari user berdasarkan email
+ * 3. Verifikasi password dengan bcrypt.compare
+ * 4. Generate JWT token
+ * 5. Return token dan data user
+ */
+
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 
-// Register
+/**
+ * POST /api/auth/register
+ * Registrasi user baru
+ *
+ * Body: {
+ *   name: string,
+ *   email: string,
+ *   password: string,
+ *   phone: string,
+ *   blood_type: string,
+ *   address: string
+ * }
+ */
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, phone, blood_type, address } = req.body;
 
-    // Validasi input
+    // Validasi: pastikan semua field diisi
     if (!name || !email || !password || !phone || !blood_type || !address) {
       return res.status(400).json({
         success: false,
@@ -17,7 +60,7 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Cek email sudah terdaftar
+    // Cek apakah email sudah terdaftar
     const [existingUser] = await db.query(
       'SELECT id FROM users WHERE email = ?',
       [email]
@@ -30,15 +73,17 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Hash password
+    // Hash password dengan bcrypt
+    // Salt rounds 10 = password di-hash 2^10 kali
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert user
+    // Insert user baru ke database
     const [result] = await db.query(
       'INSERT INTO users (name, email, password, phone, blood_type, address) VALUES (?, ?, ?, ?, ?, ?)',
       [name, email, hashedPassword, phone, blood_type, address]
     );
 
+    // Return success dengan data user (tanpa password)
     res.status(201).json({
       success: true,
       message: 'Registrasi berhasil',
@@ -60,7 +105,15 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login
+/**
+ * POST /api/auth/login
+ * Login user dan generate JWT token
+ *
+ * Body: {
+ *   email: string,
+ *   password: string
+ * }
+ */
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -73,12 +126,13 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Cari user
+    // Cari user berdasarkan email
     const [users] = await db.query(
       'SELECT * FROM users WHERE email = ?',
       [email]
     );
 
+    // Jika user tidak ditemukan
     if (users.length === 0) {
       return res.status(401).json({
         success: false,
@@ -89,6 +143,7 @@ router.post('/login', async (req, res) => {
     const user = users[0];
 
     // Verifikasi password
+    // bcrypt.compare akan hash input password dan bandingkan dengan hash di DB
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {
@@ -99,15 +154,19 @@ router.post('/login', async (req, res) => {
     }
 
     // Generate JWT token
+    // Payload: data yang akan di-encode dalam token
+    // Secret: key untuk signing token
+    // Options: expiry time
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    // Remove password from response
+    // Hapus password dari response
     delete user.password;
 
+    // Return token dan data user
     res.json({
       success: true,
       message: 'Login berhasil',
