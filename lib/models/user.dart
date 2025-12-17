@@ -1,11 +1,30 @@
+// ==================== USER MODEL ====================
+// Model untuk data user aplikasi.
+// Menyimpan informasi user dan token autentikasi.
+
 class User {
+  // ID unik dari database.
   final int? id;
+
+  // Nama lengkap user.
   final String name;
+
+  // Email untuk login.
   final String email;
+
+  // Nomor telepon.
   final String phone;
+
+  // Golongan darah (A+, A-, B+, B-, AB+, AB-, O+, O-).
   final String bloodType;
+
+  // Alamat lengkap user.
   final String address;
+
+  // Token autentikasi dari API (optional).
   final String? token;
+
+  // Tanggal akun dibuat.
   final DateTime? createdAt;
 
   User({
@@ -19,6 +38,8 @@ class User {
     this.createdAt,
   });
 
+  // Parse JSON dari API menjadi object User.
+  // Set default empty string untuk field yang mungkin null.
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
@@ -34,6 +55,7 @@ class User {
     );
   }
 
+  // Convert object menjadi JSON untuk dikirim ke API atau local storage.
   Map<String, dynamic> toJson() {
     return {
       'id': id,

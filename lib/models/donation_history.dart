@@ -1,15 +1,38 @@
+// ==================== DONATION HISTORY MODEL ====================
+// Model untuk riwayat donor darah user.
+// Menyimpan data donor beserta status dan warna badge.
+
 import 'package:flutter/material.dart';
 
 class DonationHistory {
+  // ID unik dari database.
   final int? id;
+
+  // ID user yang melakukan donor.
   final int userId;
+
+  // ID PMI tempat donor.
   final int bloodBankId;
+
+  // Nama PMI untuk ditampilkan.
   final String bloodBankName;
+
+  // Tanggal jadwal donor.
   final DateTime donationDate;
+
+  // Golongan darah yang didonorkan.
   final String bloodType;
-  final int quantity; // dalam ml
-  final String status; // pending, approved, rejected, completed
+
+  // Volume darah dalam ml (biasanya 350ml).
+  final int quantity;
+
+  // Status: pending, approved, rejected, completed.
+  final String status;
+
+  // Catatan tambahan (optional).
   final String? notes;
+
+  // Tanggal data dibuat.
   final DateTime? createdAt;
 
   DonationHistory({
@@ -25,6 +48,8 @@ class DonationHistory {
     this.createdAt,
   });
 
+  // Parse JSON dari API menjadi object DonationHistory.
+  // Set default value untuk field yang mungkin null.
   factory DonationHistory.fromJson(Map<String, dynamic> json) {
     return DonationHistory(
       id: json['id'],
@@ -44,6 +69,7 @@ class DonationHistory {
     );
   }
 
+  // Convert object menjadi JSON untuk dikirim ke API.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -59,6 +85,8 @@ class DonationHistory {
     };
   }
 
+  // Return warna badge sesuai status.
+  // completed: hijau, approved: biru, pending: oranye, rejected: merah.
   Color getStatusColor() {
     switch (status.toLowerCase()) {
       case 'completed':
@@ -74,6 +102,7 @@ class DonationHistory {
     }
   }
 
+  // Return text status dalam Bahasa Indonesia.
   String getStatusText() {
     switch (status.toLowerCase()) {
       case 'completed':

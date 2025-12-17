@@ -1,8 +1,13 @@
+// ==================== DONATION CARD WIDGET ====================
+// Widget card untuk menampilkan item riwayat donor.
+// Dengan badge status berwarna dan info lengkap donor.
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/donation_history.dart';
 
 class DonationCard extends StatelessWidget {
+  // Data riwayat donor yang akan ditampilkan.
   final DonationHistory donation;
 
   const DonationCard({
@@ -23,9 +28,11 @@ class DonationCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header: nama PMI dan badge status.
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Nama PMI (expandable untuk text panjang).
                 Expanded(
                   child: Text(
                     donation.bloodBankName,
@@ -35,16 +42,19 @@ class DonationCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                // Badge status dengan warna dinamis.
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
+                    // Warna sesuai status (dari model).
                     color: donation.getStatusColor().withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
+                    // Text status dalam Bahasa Indonesia.
                     donation.getStatusText(),
                     style: TextStyle(
                       color: donation.getStatusColor(),
@@ -56,26 +66,32 @@ class DonationCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
+            // Info donor: tanggal, golongan darah, volume.
             Row(
               children: [
+                // Tanggal donor.
                 _buildInfoItem(
                   Icons.calendar_today,
                   DateFormat('dd MMM yyyy').format(donation.donationDate),
                 ),
                 const SizedBox(width: 16),
+                // Golongan darah.
                 _buildInfoItem(
                   Icons.water_drop,
                   donation.bloodType,
                 ),
                 const SizedBox(width: 16),
+                // Volume darah dalam ml.
                 _buildInfoItem(
                   Icons.local_drink,
                   '${donation.quantity} ml',
                 ),
               ],
             ),
+            // Catatan tambahan (jika ada).
             if (donation.notes != null && donation.notes!.isNotEmpty) ...[
               const SizedBox(height: 12),
+              // Container untuk notes dengan background abu.
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -105,6 +121,8 @@ class DonationCard extends StatelessWidget {
     );
   }
 
+  // Helper widget untuk membuat item info dengan icon dan text.
+  // Dipakai untuk tanggal, golongan darah, dan volume.
   Widget _buildInfoItem(IconData icon, String text) {
     return Row(
       children: [
