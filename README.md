@@ -9,10 +9,10 @@ This Flutter-based mobile application allows users to find the nearest hospitals
 - Local database for hospital data storage
 
 ## My Contribution
-- Developing the frontend interface
+- Developing the frontend interface using Flutter
 - Integrating the frontend with backend APIs
-- Connecting the API with the local database
-- Ensuring data retrieval and display works correctly between client and server
+- Connecting the Node.js API with the local database
+- Ensuring smooth data retrieval and communication between the Flutter client and the backend server
 
 ## How the App Works
 - The application requests the user's location through the browser's geolocation feature.
