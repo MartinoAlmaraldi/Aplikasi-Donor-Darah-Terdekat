@@ -1,16 +1,24 @@
-# uas_pemrograman_mobile
+# uas_pemrograman_mobile, Blood Donation Locator App
 
-A new Flutter project.
+This Flutter-based mobile application allows users to find the nearest hospitals for blood donation using geolocation. The application retrieves the user's location and compares it with hospital location data stored in a local database through a Node.js API.
 
-## Getting Started
+#App Features
+- Detect user location using geolocation
+- Display nearby hospitals that accept blood donors
+- Integration between frontend and backend API
+- Local database for hospital data storage
 
-This project is a starting point for a Flutter application.
+##My Contribution
+- Developing the frontend interface
+- Integrating the frontend with backend APIs
+- Connecting the API with the local database
+- Ensuring data retrieval and display works correctly between client and server
 
-A few resources to get you started if this is your first Flutter project:
+##How the App Works
+- The application requests the user's location through the browser's geolocation feature.
+- The system retrieves hospital location data from the local database.
+- The backend API processes the data.
+- The frontend displays hospitals that are closest to the user's location.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+This project was created for learning and academic purposes.
